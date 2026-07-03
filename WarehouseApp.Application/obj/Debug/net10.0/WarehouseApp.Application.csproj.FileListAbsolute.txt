@@ -1,0 +1,15 @@
+C:\Users\edinv\Projects\EntityProbaSam\WarehouseApp\WarehouseApp.Application\bin\Debug\net10.0\WarehouseApp.Application.deps.json
+C:\Users\edinv\Projects\EntityProbaSam\WarehouseApp\WarehouseApp.Application\bin\Debug\net10.0\WarehouseApp.Application.dll
+C:\Users\edinv\Projects\EntityProbaSam\WarehouseApp\WarehouseApp.Application\bin\Debug\net10.0\WarehouseApp.Application.pdb
+C:\Users\edinv\Projects\EntityProbaSam\WarehouseApp\WarehouseApp.Application\bin\Debug\net10.0\WarehouseApp.Domain.dll
+C:\Users\edinv\Projects\EntityProbaSam\WarehouseApp\WarehouseApp.Application\bin\Debug\net10.0\WarehouseApp.Domain.pdb
+C:\Users\edinv\Projects\EntityProbaSam\WarehouseApp\WarehouseApp.Application\obj\Debug\net10.0\WarehouseApp.Application.csproj.AssemblyReference.cache
+C:\Users\edinv\Projects\EntityProbaSam\WarehouseApp\WarehouseApp.Application\obj\Debug\net10.0\WarehouseApp.Application.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\edinv\Projects\EntityProbaSam\WarehouseApp\WarehouseApp.Application\obj\Debug\net10.0\WarehouseApp.Application.AssemblyInfoInputs.cache
+C:\Users\edinv\Projects\EntityProbaSam\WarehouseApp\WarehouseApp.Application\obj\Debug\net10.0\WarehouseApp.Application.AssemblyInfo.cs
+C:\Users\edinv\Projects\EntityProbaSam\WarehouseApp\WarehouseApp.Application\obj\Debug\net10.0\WarehouseApp.Application.csproj.CoreCompileInputs.cache
+C:\Users\edinv\Projects\EntityProbaSam\WarehouseApp\WarehouseApp.Application\obj\Debug\net10.0\Warehous.895902C2.Up2Date
+C:\Users\edinv\Projects\EntityProbaSam\WarehouseApp\WarehouseApp.Application\obj\Debug\net10.0\WarehouseApp.Application.dll
+C:\Users\edinv\Projects\EntityProbaSam\WarehouseApp\WarehouseApp.Application\obj\Debug\net10.0\refint\WarehouseApp.Application.dll
+C:\Users\edinv\Projects\EntityProbaSam\WarehouseApp\WarehouseApp.Application\obj\Debug\net10.0\WarehouseApp.Application.pdb
+C:\Users\edinv\Projects\EntityProbaSam\WarehouseApp\WarehouseApp.Application\obj\Debug\net10.0\ref\WarehouseApp.Application.dll

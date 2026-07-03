@@ -1,0 +1,17 @@
+C:\Users\edinv\Projects\EntityProbaSam\WarehouseApp\WarehouseApp.Infrastructure\bin\Debug\net10.0\WarehouseApp.Infrastructure.deps.json
+C:\Users\edinv\Projects\EntityProbaSam\WarehouseApp\WarehouseApp.Infrastructure\bin\Debug\net10.0\WarehouseApp.Infrastructure.dll
+C:\Users\edinv\Projects\EntityProbaSam\WarehouseApp\WarehouseApp.Infrastructure\bin\Debug\net10.0\WarehouseApp.Infrastructure.pdb
+C:\Users\edinv\Projects\EntityProbaSam\WarehouseApp\WarehouseApp.Infrastructure\bin\Debug\net10.0\WarehouseApp.Application.dll
+C:\Users\edinv\Projects\EntityProbaSam\WarehouseApp\WarehouseApp.Infrastructure\bin\Debug\net10.0\WarehouseApp.Domain.dll
+C:\Users\edinv\Projects\EntityProbaSam\WarehouseApp\WarehouseApp.Infrastructure\bin\Debug\net10.0\WarehouseApp.Application.pdb
+C:\Users\edinv\Projects\EntityProbaSam\WarehouseApp\WarehouseApp.Infrastructure\bin\Debug\net10.0\WarehouseApp.Domain.pdb
+C:\Users\edinv\Projects\EntityProbaSam\WarehouseApp\WarehouseApp.Infrastructure\obj\Debug\net10.0\WarehouseApp.Infrastructure.csproj.AssemblyReference.cache
+C:\Users\edinv\Projects\EntityProbaSam\WarehouseApp\WarehouseApp.Infrastructure\obj\Debug\net10.0\WarehouseApp.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\edinv\Projects\EntityProbaSam\WarehouseApp\WarehouseApp.Infrastructure\obj\Debug\net10.0\WarehouseApp.Infrastructure.AssemblyInfoInputs.cache
+C:\Users\edinv\Projects\EntityProbaSam\WarehouseApp\WarehouseApp.Infrastructure\obj\Debug\net10.0\WarehouseApp.Infrastructure.AssemblyInfo.cs
+C:\Users\edinv\Projects\EntityProbaSam\WarehouseApp\WarehouseApp.Infrastructure\obj\Debug\net10.0\WarehouseApp.Infrastructure.csproj.CoreCompileInputs.cache
+C:\Users\edinv\Projects\EntityProbaSam\WarehouseApp\WarehouseApp.Infrastructure\obj\Debug\net10.0\Warehous.47F64C99.Up2Date
+C:\Users\edinv\Projects\EntityProbaSam\WarehouseApp\WarehouseApp.Infrastructure\obj\Debug\net10.0\WarehouseApp.Infrastructure.dll
+C:\Users\edinv\Projects\EntityProbaSam\WarehouseApp\WarehouseApp.Infrastructure\obj\Debug\net10.0\refint\WarehouseApp.Infrastructure.dll
+C:\Users\edinv\Projects\EntityProbaSam\WarehouseApp\WarehouseApp.Infrastructure\obj\Debug\net10.0\WarehouseApp.Infrastructure.pdb
+C:\Users\edinv\Projects\EntityProbaSam\WarehouseApp\WarehouseApp.Infrastructure\obj\Debug\net10.0\ref\WarehouseApp.Infrastructure.dll
