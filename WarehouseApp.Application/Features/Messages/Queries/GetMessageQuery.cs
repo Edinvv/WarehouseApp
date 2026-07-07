@@ -5,15 +5,16 @@ using WarehouseApp.Application.DTOs;
 
 
 namespace WarehouseApp.Application.Features.Messages.Queries;
-public record GetMessageQuery(string UserId , string OtherUserId) : IRequest<List<MessageDto>>;
-    public class GetMessageQueryHandler : IRequestHandler<GetMessageQuery, List<MessageDto>>
+
+public record GetMessageQuery(string UserId, string OtherUserId) : IRequest<List<MessageDto>>;
+public class GetMessageQueryHandler : IRequestHandler<GetMessageQuery, List<MessageDto>>
+{
+    private readonly IAppDbContext _context;
+    public GetMessageQueryHandler(IAppDbContext context)
     {
-        private readonly IAppDbContext _context;
-        public GetMessageQueryHandler(IAppDbContext context)
-        {
-            _context = context;
-        }
-        public async Task<List<MessageDto>> Handle(GetMessageQuery request, CancellationToken cancellationToken)
+        _context = context;
+    }
+    public async Task<List<MessageDto>> Handle(GetMessageQuery request, CancellationToken cancellationToken)
     {
         return await _context.Messages
     .Where(m =>
@@ -35,6 +36,6 @@ public record GetMessageQuery(string UserId , string OtherUserId) : IRequest<Lis
     .ToListAsync(cancellationToken);
 
     }
-    
-        
-    }
+
+
+}

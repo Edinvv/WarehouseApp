@@ -1,0 +1,24 @@
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using WarehouseApp.Application.Common.Interfaces;
+using WarehouseApp.Domain.Entities;
+
+namespace WarehouseApp.Infrastructure.Persistence;
+
+public class AppDbContext : IdentityDbContext<AppUser>, IAppDbContext
+{
+    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
+
+    public DbSet<Sector> Sectors => Set<Sector>();
+    public DbSet<Product> Products => Set<Product>();
+    public DbSet<WarehouseTask> WarehouseTasks => Set<WarehouseTask>();
+    public DbSet<Comment> Comments => Set<Comment>();
+    public DbSet<Message> Messages => Set<Message>();
+    public DbSet<Notification> Notifications => Set<Notification>();
+
+    protected override void OnModelCreating(ModelBuilder builder)
+    {
+        base.OnModelCreating(builder);
+        builder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
+    }
+}

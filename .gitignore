@@ -1,0 +1,19 @@
+# Build output
+bin/
+obj/
+
+# SQLite database files
+*.db
+*.db-shm
+*.db-wal
+
+# User settings
+.vs/
+*.user
+
+# Environment / secrets
+appsettings.Development.json
+
+# Node
+node_modules/
+dist/
