@@ -7,7 +7,7 @@ using WarehouseApp.Application.Features.Sectors.Queries;
 namespace WarehouseApp.API.Controllers;
 
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/sectors")]
     public class SectorController : ControllerBase
     {
         private readonly IMediator _mediator;

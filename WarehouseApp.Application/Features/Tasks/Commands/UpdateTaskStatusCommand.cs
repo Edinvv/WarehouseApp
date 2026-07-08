@@ -5,24 +5,35 @@ using WarehouseApp.Application.Common.Interfaces;
 
 namespace WarehouseApp.Application.Features.Tasks.Commands;
 
-public record UpdateTaskStatusCommand(Guid TaskId, TaskStatus NewStatus) : IRequest<bool>;
+public enum UpdateStatusResult { Success, NotFound, Forbidden }
 
-    public class UpdateTaskStatusCommandHandler : IRequestHandler<UpdateTaskStatusCommand, bool>
+public record UpdateTaskStatusCommand(
+    Guid TaskId,
+    TaskStatus NewStatus,
+    string CallerUserId,
+    string CallerRole
+) : IRequest<UpdateStatusResult>;
+
+public class UpdateTaskStatusCommandHandler : IRequestHandler<UpdateTaskStatusCommand, UpdateStatusResult>
+{
+    private readonly IAppDbContext _context;
+    public UpdateTaskStatusCommandHandler(IAppDbContext context) => _context = context;
+
+    public async Task<UpdateStatusResult> Handle(UpdateTaskStatusCommand request, CancellationToken cancellationToken)
     {
-        private readonly IAppDbContext _context;
-        public UpdateTaskStatusCommandHandler(IAppDbContext context)
-        {
-            _context = context;
-        }
-        public async Task<bool> Handle(UpdateTaskStatusCommand request, CancellationToken cancellationToken)
-    {
-        var task = await _context.WarehouseTasks.FirstOrDefaultAsync(t => t.Id == request.TaskId, cancellationToken);
-        if (task == null)
-        {
-           return false;
-        }
+        var task = await _context.WarehouseTasks
+            .FirstOrDefaultAsync(t => t.Id == request.TaskId, cancellationToken);
+
+        if (task == null) return UpdateStatusResult.NotFound;
+
+        if (request.CallerRole == "Worker" && task.AssignedToId != request.CallerUserId)
+            return UpdateStatusResult.Forbidden;
+
+        if (request.CallerRole == "Worker" && task.Status == TaskStatus.Done)
+            return UpdateStatusResult.Forbidden;
+
         task.Status = request.NewStatus;
         await _context.SaveChangesAsync(cancellationToken);
-        return true;
+        return UpdateStatusResult.Success;
     }
-    }
+}

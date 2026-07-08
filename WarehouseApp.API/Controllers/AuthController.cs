@@ -17,11 +17,12 @@ public class AuthController : ControllerBase
 {
       private readonly UserManager<AppUser> _userManager;
         private readonly IConfiguration _configuration;
-    public AuthController(UserManager<AppUser> userManager, IConfiguration configuration)
+        private readonly RoleManager<IdentityRole> _roleManager;
+    public AuthController(UserManager<AppUser> userManager, IConfiguration configuration, RoleManager<IdentityRole> roleManager)
     {
       _userManager = userManager;
       _configuration = configuration;
-
+      _roleManager = roleManager;
 
     }
     [HttpPost("register")]
@@ -39,6 +40,7 @@ public async Task<IActionResult> Register(RegisterRequest request)
          {
              return BadRequest(result.Errors);
          }
+         await _userManager.AddToRoleAsync(user, "Worker");
          return Ok();
     }
     [HttpPost("login")]

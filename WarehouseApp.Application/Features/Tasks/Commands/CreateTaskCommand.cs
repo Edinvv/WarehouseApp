@@ -1,10 +1,14 @@
+using System.Text.Json;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using WarehouseApp.Application.Common.Interfaces;
 using WarehouseApp.Domain.Entities;
 using WarehouseApp.Domain.Enums;
 using TaskStatus = WarehouseApp.Domain.Enums.TaskStatus;
+
 namespace WarehouseApp.Application.Features.Tasks.Commands;
- public record CreateTaskCommand(
+
+public record CreateTaskCommand(
     string Title,
     string? Description,
     TaskPriority Priority,
@@ -13,16 +17,19 @@ namespace WarehouseApp.Application.Features.Tasks.Commands;
     string? AssignedToId,
     string CreatedById
 ) : IRequest<Guid>;
-    public class CreateTaskCommandHandler : IRequestHandler<CreateTaskCommand, Guid>
+
+public class CreateTaskCommandHandler : IRequestHandler<CreateTaskCommand, Guid>
+{
+    private readonly IAppDbContext _context;
+    private readonly INotificationService _notificationService;
+
+    public CreateTaskCommandHandler(IAppDbContext context, INotificationService notificationService)
     {
-        private readonly IAppDbContext _context;
-            private readonly INotificationService _notificationService;
-        public CreateTaskCommandHandler(IAppDbContext context, INotificationService notificationService)
-        {
-            _context = context;
-            _notificationService = notificationService;
-        }
-        public async Task<Guid> Handle(CreateTaskCommand request, CancellationToken cancellationToken)
+        _context = context;
+        _notificationService = notificationService;
+    }
+
+    public async Task<Guid> Handle(CreateTaskCommand request, CancellationToken cancellationToken)
     {
         var task = new WarehouseTask
         {
@@ -37,21 +44,30 @@ namespace WarehouseApp.Application.Features.Tasks.Commands;
             Status = TaskStatus.Todo,
             CreatedAt = DateTime.UtcNow
         };
-      await _context.WarehouseTasks.AddAsync(task, cancellationToken);
+
+        await _context.WarehouseTasks.AddAsync(task, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
+
         if (request.AssignedToId is not null)
-{
-    await _notificationService.SendToUserAsync(
-        request.AssignedToId,
-        $"You have been assigned a new task: {request.Title}",
-        "TaskAssigned"
-    );
-}
+        {
+            var sector = await _context.Sectors
+                .FirstOrDefaultAsync(s => s.Id == request.SectorId, cancellationToken);
+            var sectorName = sector?.Name ?? "Unknown";
+
+            var metadata = JsonSerializer.Serialize(new
+            {
+                sectorId = task.SectorId,
+                taskId = task.Id
+            });
+
+            await _notificationService.SendToUserAsync(
+                request.AssignedToId,
+                $"You have been assigned a new task: {request.Title} — Sector: {sectorName}",
+                "TaskAssigned",
+                metadata
+            );
+        }
 
         return task.Id;
-
-
     }
-    
-        
-    }
+}

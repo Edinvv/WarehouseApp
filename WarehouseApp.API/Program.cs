@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
@@ -48,7 +48,9 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthorization();
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(
     typeof(WarehouseApp.Application.Features.Sectors.Queries.GetSectorsQuery).Assembly));
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+        options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter()));
 builder.Services.AddOpenApi();
 builder.Services.AddCors(options =>
 {
@@ -100,6 +102,16 @@ using (var scope = app.Services.CreateScope())
         await userManager.CreateAsync(admin, "Admin123!");
         await userManager.AddToRoleAsync(admin, "Admin");
     }
+    var sectorNames = new[] { "Electronics", "Clothing", "Food & Beverage", "Tools & Hardware" };
+foreach (var name in sectorNames)
+{
+    if (!db.Sectors.Any(s => s.Name == name))
+    {
+        db.Sectors.Add(new Sector { Id = Guid.NewGuid(), Name = name });
+    }
+}
+await db.SaveChangesAsync();
 }
 
 app.Run();
+
