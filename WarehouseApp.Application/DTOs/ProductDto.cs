@@ -7,5 +7,6 @@ namespace WarehouseApp.Application.DTOs;
         string Name,
         int Quantity,
         int MinimumStock,
+        string Barcode,
         bool IsLowStock );
     

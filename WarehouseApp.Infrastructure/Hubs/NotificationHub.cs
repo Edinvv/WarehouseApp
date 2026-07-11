@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.SignalR;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace WarehouseApp.Infrastructure.Hubs
@@ -9,10 +10,18 @@ namespace WarehouseApp.Infrastructure.Hubs
         {
                 if (Context.UserIdentifier is not null)
             await Groups.AddToGroupAsync(Context.ConnectionId, Context.UserIdentifier);
+           var cont= Context.User?.FindFirst(ClaimTypes.Role)?.Value;
+           if(cont is not null){
+               await Groups.AddToGroupAsync(Context.ConnectionId,$"role:{cont}");
+            }
+            
+
+            
 
         await base.OnConnectedAsync();
 
         }
+        
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
               if (Context.UserIdentifier is not null)

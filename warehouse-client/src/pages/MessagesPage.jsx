@@ -30,7 +30,7 @@ function Avatar({ name, size = 36 }) {
 
 export default function MessagesPage() {
   const { userId } = useAuth()
-  const { markReadBySender } = useNotifications()
+  const { markReadBySender, notifications } = useNotifications()
   const [users, setUsers] = useState([])
   const [selectedUser, setSelectedUser] = useState(null)
   const [messages, setMessages] = useState([])
@@ -51,6 +51,15 @@ export default function MessagesPage() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
+
+  useEffect(() => {
+    if (!selectedUser) return
+    const latest = notifications[0]
+    if (latest?.type === 'NewMessage' && latest?.metadata?.senderId === selectedUser.id) {
+      fetchMessages()
+      markReadBySender(selectedUser.id)
+    }
+  }, [notifications])
 
   const fetchMessages = () => {
     api.get(`/messages?otherUserId=${selectedUser.id}`)

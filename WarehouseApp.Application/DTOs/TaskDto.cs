@@ -12,7 +12,6 @@ public record TaskDto(
     DateTime? DueDate,
     DateTime CreatedAt,
     Guid SectorId,
-    string? AssignedToId,
-    string? AssignedToName
+    List<TaskAssignmentDto> Assignments
 );
     

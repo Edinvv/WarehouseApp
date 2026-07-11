@@ -7,6 +7,7 @@ import { COLUMNS } from '../constants'
 import TaskCard from '../components/TaskCard'
 import CreateTaskModal from '../components/CreateTaskModal'
 import TaskDetailDrawer from '../components/TaskDetailDrawer'
+import SectorTabs from '../components/SectorTabs'
 
 const ACTIVE_COLUMNS = COLUMNS.filter(c => c.key !== 'Done')
 
@@ -58,6 +59,7 @@ export default function SectorBoardPage() {
 
   return (
     <Layout>
+      <SectorTabs sectorId={id} />
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '32px' }}>
         <div>
           <h1 style={{ fontFamily: 'Barlow, sans-serif', fontSize: '28px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '4px' }}>
@@ -225,6 +227,10 @@ export default function SectorBoardPage() {
         task={selectedTask}
         onClose={() => setSelectedTask(null)}
         onStatusChange={handleStatusChange}
+        onTaskUpdated={() => {
+          fetchTasks()
+          setSelectedTask(null)
+        }}
       />
     </Layout>
   )

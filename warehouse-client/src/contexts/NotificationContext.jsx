@@ -12,6 +12,7 @@ function parseMeta(raw) {
 export function NotificationProvider({ children }) {
   const { token, isLoggedIn } = useAuth()
   const [notifications, setNotifications] = useState([])
+  const [pendingDelivery, setPendingDelivery] = useState(null)
 
   useEffect(() => {
     if (!isLoggedIn || !token) return
@@ -24,11 +25,18 @@ export function NotificationProvider({ children }) {
       .build()
 
     conn.on('ReceiveNotification', (message, type, metadataRaw) => {
+      const metadata = parseMeta(metadataRaw)
+
+      if (type === 'DeliveryArrived') {
+        setPendingDelivery({ message, metadata })
+        return
+      }
+
       setNotifications(prev => [{
         id: Date.now(),
         message,
         type,
-        metadata: parseMeta(metadataRaw),
+        metadata,
         receivedAt: new Date(),
         read: false,
       }, ...prev])
@@ -47,11 +55,12 @@ export function NotificationProvider({ children }) {
       n.type === 'NewMessage' && n.metadata?.senderId === senderId ? { ...n, read: true } : n
     ))
   }
+  const clearPendingDelivery = () => setPendingDelivery(null)
 
   const unreadCount = notifications.filter(n => !n.read).length
 
   return (
-    <NotificationContext.Provider value={{ notifications, unreadCount, markAllRead, clearAll, markNotificationRead, markReadBySender }}>
+    <NotificationContext.Provider value={{ notifications, unreadCount, markAllRead, clearAll, markNotificationRead, markReadBySender, pendingDelivery, clearPendingDelivery }}>
       {children}
     </NotificationContext.Provider>
   )

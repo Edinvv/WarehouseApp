@@ -21,12 +21,12 @@ public class UpdateTaskStatusCommandHandler : IRequestHandler<UpdateTaskStatusCo
 
     public async Task<UpdateStatusResult> Handle(UpdateTaskStatusCommand request, CancellationToken cancellationToken)
     {
-        var task = await _context.WarehouseTasks
+        var task = await _context.WarehouseTasks.Include(t=>t.TaskAssignments)
             .FirstOrDefaultAsync(t => t.Id == request.TaskId, cancellationToken);
 
         if (task == null) return UpdateStatusResult.NotFound;
 
-        if (request.CallerRole == "Worker" && task.AssignedToId != request.CallerUserId)
+        if (request.CallerRole == "Worker" && !task.TaskAssignments.Any(a=>a.UserId == request.CallerUserId))
             return UpdateStatusResult.Forbidden;
 
         if (request.CallerRole == "Worker" && task.Status == TaskStatus.Done)

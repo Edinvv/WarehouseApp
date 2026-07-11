@@ -140,6 +140,7 @@ export default function Sidebar() {
 
   const navItems = [
     { label: 'Sectors', path: '/dashboard', icon: '⬡' },
+    ...(role === 'Admin' || role === 'Supervisor' ? [{ label: 'Inbound Orders', path: '/inbound-orders', icon: '↓' }] : []),
     { label: 'Messages', path: '/messages', icon: '✉' },
     ...(role === 'Admin' ? [{ label: 'Team', path: '/users', icon: '◎' }] : []),
   ]
@@ -239,8 +240,30 @@ export default function Sidebar() {
           </button>
         </nav>
 
+        {/* Role badge */}
+        <div style={{ padding: '12px 16px', borderTop: '1px solid var(--border)' }}>
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: '8px',
+            padding: '8px 12px',
+            backgroundColor: 'rgba(245,158,11,0.06)',
+            border: '1px solid rgba(245,158,11,0.2)',
+            borderRadius: '8px',
+          }}>
+            <div style={{
+              width: '8px', height: '8px', borderRadius: '50%',
+              backgroundColor: 'var(--accent)', flexShrink: 0,
+            }} />
+            <span style={{ fontSize: '12px', color: 'var(--text-secondary)', fontFamily: 'Inter, sans-serif' }}>
+              Logged in as
+            </span>
+            <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--accent)', fontFamily: 'Barlow, sans-serif' }}>
+              {role}
+            </span>
+          </div>
+        </div>
+
         {/* Logout */}
-        <div style={{ padding: '16px 12px', borderTop: '1px solid var(--border)' }}>
+        <div style={{ padding: '0 12px 16px' }}>
           <button onClick={handleLogout} style={{
             width: '100%', padding: '10px 12px',
             backgroundColor: 'transparent',

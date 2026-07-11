@@ -15,10 +15,6 @@ public class TaskConfiguration : IEntityTypeConfiguration<WarehouseTask>
             .WithMany(s => s.Tasks)
             .HasForeignKey(p => p.SectorId)
             .OnDelete(DeleteBehavior.Cascade);
-        builder.HasOne(t => t.AssignedTo)
-        .WithMany(u => u.AssignedTasks)
-        .HasForeignKey(t => t.AssignedToId)
-        .OnDelete(DeleteBehavior.SetNull);
         builder.HasOne(t => t.CreatedBy)
        .WithMany()
        .HasForeignKey(t => t.CreatedById)

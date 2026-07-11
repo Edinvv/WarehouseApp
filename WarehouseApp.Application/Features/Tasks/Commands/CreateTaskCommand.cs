@@ -39,13 +39,23 @@ public class CreateTaskCommandHandler : IRequestHandler<CreateTaskCommand, Guid>
             Priority = request.Priority,
             DueDate = request.DueDate,
             SectorId = request.SectorId,
-            AssignedToId = request.AssignedToId,
             CreatedById = request.CreatedById,
             Status = TaskStatus.Todo,
             CreatedAt = DateTime.UtcNow
         };
 
         await _context.WarehouseTasks.AddAsync(task, cancellationToken);
+
+        if (request.AssignedToId is not null)
+        {
+            _context.TaskAssignments.Add(new WarehouseApp.Domain.Entities.TaskAssignment
+            {
+                Id = Guid.NewGuid(),
+                WarehouseTaskId = task.Id,
+                UserId = request.AssignedToId
+            });
+        }
+
         await _context.SaveChangesAsync(cancellationToken);
 
         if (request.AssignedToId is not null)

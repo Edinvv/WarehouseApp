@@ -22,6 +22,7 @@ public record GetProductsBySectorIdQuery(Guid SectorId) : IRequest<List<ProductD
                     p.Name,
                     p.Quantity,
                     p.MinimumQuantity,
+                    p.Barcode,
                     p.Quantity < p.MinimumQuantity
                 ))
                 .ToListAsync(cancellationToken);

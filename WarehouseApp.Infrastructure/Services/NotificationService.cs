@@ -14,4 +14,6 @@ public class NotificationService : INotificationService
 
     public async Task SendToAllAsync(string message, string type)
         => await _hubContext.Clients.All.SendAsync("ReceiveNotification", message, type, null);
+        public async Task SendToRoleAsync(string role, string message, string type, string? metadata = null)
+        => await _hubContext.Clients.Group($"role:{role}").SendAsync("ReceiveNotification",message,type,metadata);
 }

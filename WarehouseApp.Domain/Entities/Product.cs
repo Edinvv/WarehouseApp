@@ -7,6 +7,7 @@ public class Product
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }
+    public string Barcode { get; set; } = string.Empty;
 
     public Guid SectorId { get; set; }
     public Sector Sector { get; set; } = null!;

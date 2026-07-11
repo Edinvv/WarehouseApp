@@ -20,6 +20,7 @@ namespace WarehouseApp.Application.Features.Products.Commands;
                 Name = request.Name,
                 Quantity = request.Quantity,
                 MinimumQuantity = request.MinimumQuantity,
+                
                 SectorId = request.SectorId
             };
 

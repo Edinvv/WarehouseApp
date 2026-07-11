@@ -3,20 +3,51 @@ import api from '../api/axios'
 import { useAuth } from '../contexts/AuthContext'
 import { COLUMNS, PRIORITY_COLORS } from '../constants'
 
-export default function TaskDetailDrawer({ task, onClose, onStatusChange }) {
+export default function TaskDetailDrawer({ task, onClose, onStatusChange, onTaskUpdated }) {
   const { userId, role } = useAuth()
   const [comments, setComments] = useState([])
   const [commentText, setCommentText] = useState('')
   const [posting, setPosting] = useState(false)
+  const [workers, setWorkers] = useState([])
+  const [assigning, setAssigning] = useState(false)
+  const [selectedWorkerIds, setSelectedWorkerIds] = useState([])
   const bottomRef = useRef(null)
 
   const isPrivileged = role === 'Admin' || role === 'Supervisor'
-  const canChangeStatus = isPrivileged || (task?.assignedToId === userId && task?.status !== 'Done')
-
+  const canChangeStatus = isPrivileged || (task?.assignments?.some(a => a.userId === userId) && task?.status !== 'Done')
+useEffect(()=>{
+  if (!task) return
+setSelectedWorkerIds(
+  task.assignments.map(a=>a.userId)
+)
+},[task])
   useEffect(() => {
     if (!task) return
     api.get(`/comments?taskId=${task.id}`).then(res => setComments(res.data))
   }, [task])
+
+  useEffect(() => {
+    if (!isPrivileged) return
+    api.get('/users').then(res => setWorkers(res.data.filter(u => u.role === 'Worker')))
+  }, [isPrivileged])
+
+  const toggleWorker = (workerId) => {
+    setSelectedWorkerIds(prev =>
+      prev.includes(workerId)
+        ? prev.filter(id => id !== workerId)
+        : [...prev, workerId]
+    )
+  }
+
+  const handleConfirmAssign = async () => {
+    setAssigning(true)
+    try {
+      await api.put(`/tasks/${task.id}/assign`, { userIds: selectedWorkerIds })
+      onTaskUpdated?.()
+    } finally {
+      setAssigning(false)
+    }
+  }
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -86,13 +117,50 @@ export default function TaskDetailDrawer({ task, onClose, onStatusChange }) {
                 </p>
               </div>
             )}
-            {task.assignedToName && (
+            {task.assignments?.length > 0 && (
               <div>
                 <p style={{ fontSize: '11px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '3px' }}>Assigned To</p>
-                <p style={{ fontSize: '13px', color: 'var(--text-primary)', fontWeight: 500 }}>{task.assignedToName}</p>
+                <p style={{ fontSize: '13px', color: 'var(--text-primary)', fontWeight: 500 }}>
+                  {task.assignments.map(a => a.userName).join(', ')}
+                </p>
               </div>
             )}
           </div>
+
+          {/* Assign workers — only visible to Admin/Supervisor */}
+          {isPrivileged && (
+            <div>
+              <p style={{ fontSize: '11px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px', fontFamily: 'Barlow, sans-serif', fontWeight: 600 }}>
+                Assign Workers
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '10px' }}>
+                {workers.map(w => (
+                  <label key={w.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: '13px', color: 'var(--text-primary)' }}>
+                    <input
+                      type="checkbox"
+                      checked={selectedWorkerIds.includes(w.id)}
+                      onChange={() => toggleWorker(w.id)}
+                      style={{ width: '15px', height: '15px', accentColor: 'var(--accent)', cursor: 'pointer' }}
+                    />
+                    {w.firstName} {w.lastName}
+                  </label>
+                ))}
+              </div>
+              <button
+                onClick={handleConfirmAssign}
+                disabled={assigning}
+                style={{
+                  padding: '7px 16px', fontSize: '12px', fontWeight: 600,
+                  backgroundColor: 'var(--accent)', border: 'none',
+                  borderRadius: '6px', color: '#0F1117',
+                  cursor: assigning ? 'not-allowed' : 'pointer',
+                  fontFamily: 'Barlow, sans-serif',
+                }}
+              >
+                {assigning ? 'Saving...' : 'Confirm Assignments'}
+              </button>
+            </div>
+          )}
 
           {/* Status change buttons */}
           {canChangeStatus ? (

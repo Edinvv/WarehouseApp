@@ -3,11 +3,13 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WarehouseApp.Application.Features.Tasks.Commands;
+using WarehouseApp.Application.Features.TaskAssignment.Commands;
 using WarehouseApp.Application.Features.Tasks.Queries;
 
 namespace WarehouseApp.API.Controllers;
 
 public record UpdateStatusRequest(string Status);
+public record AssignTaskRequest(List<string> UserIds);
 
 [ApiController]
 [Route("api/[controller]")]
@@ -30,6 +32,15 @@ public class TasksController : ControllerBase
     {
         var result = await _mediator.Send(command);
         return Ok(result);
+    }
+
+    [HttpPut("{id}/assign")]
+    [Authorize(Roles = "Admin,Supervisor")]
+    public async Task<IActionResult> AssignTask(Guid id, [FromBody] AssignTaskRequest request)
+    {
+        var result = await _mediator.Send(new AssignWorkersCommand(id, request.UserIds));
+        if (!result) return NotFound();
+        return NoContent();
     }
 
     [HttpPut("{id}/status")]

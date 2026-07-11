@@ -15,7 +15,9 @@ public class AppDbContext : IdentityDbContext<AppUser>, IAppDbContext
     public DbSet<Comment> Comments => Set<Comment>();
     public DbSet<Message> Messages => Set<Message>();
     public DbSet<Notification> Notifications => Set<Notification>();
-
+public DbSet<InboundOrder> InboundOrders => Set<InboundOrder>();
+public DbSet<InboundOrderItem> InboundOrderItems => Set<InboundOrderItem>();
+public DbSet<TaskAssignment> TaskAssignments => Set<TaskAssignment>();
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);

@@ -8,7 +8,7 @@ public class AppUser : IdentityUser
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
 
-    public ICollection<WarehouseTask> AssignedTasks { get; set; } = new List<WarehouseTask>();
+   
     public ICollection<Message> SentMessages { get; set; } = new List<Message>();
     public ICollection<Message> ReceivedMessages { get; set; } = new List<Message>();
 

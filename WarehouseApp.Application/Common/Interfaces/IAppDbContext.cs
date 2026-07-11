@@ -11,6 +11,9 @@ public interface IAppDbContext
     DbSet<Comment> Comments { get; }
     DbSet<Message> Messages { get; }
     DbSet<Notification> Notifications { get; }
+    DbSet<InboundOrder> InboundOrders { get; }
+    DbSet<InboundOrderItem> InboundOrderItems { get; }
+    DbSet<TaskAssignment> TaskAssignments {get;}
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

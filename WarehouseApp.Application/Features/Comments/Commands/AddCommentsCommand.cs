@@ -25,16 +25,21 @@ namespace WarehouseApp.Application.Features.Comments.Commands;
         };
         await _context.Comments.AddAsync(comment, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
-        var task = await _context.WarehouseTasks.FirstOrDefaultAsync(t => t.Id == request.TaskId, cancellationToken);
+        var task = await _context.WarehouseTasks
+            .Include(t => t.TaskAssignments)
+            .FirstOrDefaultAsync(t => t.Id == request.TaskId, cancellationToken);
 
-if (task?.AssignedToId is not null && task.AssignedToId != request.AuthorId)
-{
-    await _notificationService.SendToUserAsync(
-        task.AssignedToId,
-        $"New comment on your task: {task.Title}",
-        "NewComment"
-    );
-}
+        if (task is not null)
+        {
+            foreach (var assignment in task.TaskAssignments.Where(a => a.UserId != request.AuthorId))
+            {
+                await _notificationService.SendToUserAsync(
+                    assignment.UserId,
+                    $"New comment on your task: {task.Title}",
+                    "NewComment"
+                );
+            }
+        }
         return comment.Id;
     }
     }
