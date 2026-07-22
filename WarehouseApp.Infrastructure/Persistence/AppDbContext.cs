@@ -14,6 +14,7 @@ public class AppDbContext : IdentityDbContext<AppUser>, IAppDbContext
     public DbSet<WarehouseTask> WarehouseTasks => Set<WarehouseTask>();
     public DbSet<Comment> Comments => Set<Comment>();
     public DbSet<Message> Messages => Set<Message>();
+   public DbSet<TaskItem> TaskItems => Set<TaskItem>();
     public DbSet<Notification> Notifications => Set<Notification>();
 public DbSet<InboundOrder> InboundOrders => Set<InboundOrder>();
 public DbSet<InboundOrderItem> InboundOrderItems => Set<InboundOrderItem>();

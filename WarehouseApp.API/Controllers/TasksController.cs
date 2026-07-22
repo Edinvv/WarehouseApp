@@ -63,4 +63,13 @@ public class TasksController : ControllerBase
             _ => BadRequest()
         };
     }
+
+    [HttpPut("items/{id}/complete")]
+    [Authorize(Roles = "Worker,Supervisor,Admin")]
+    public async Task<IActionResult> CompleteTaskItem(Guid id)
+    {
+        var result = await _mediator.Send(new CompleteTaskItemCommand(id));
+        if (!result) return NotFound();
+        return NoContent();
+    }
 }

@@ -49,23 +49,42 @@ public record DeliveryArrivedCommand(Guid OrderId, string? CallerUserId = null) 
                var product =  await _context.Products.FirstOrDefaultAsync(p => p.Barcode == item.Barcode && p.SectorId == item.SectorId, cancellationToken);
                 product!.Quantity += item.Quantity;
             }
-            var taskId = Guid.NewGuid();
-            var taskTitle = $"Restock {item.ProductName} to shelf";
-            _context.WarehouseTasks.Add(new WarehouseTask
-            {
-                Id = taskId,
-                Title = taskTitle,
-                Status = TaskStatus.Todo,
-                CreatedById = request.CallerUserId,
-                InboundOrderId = order.Id,
-                SectorId = item.SectorId,
-                CreatedAt = DateTime.UtcNow
-            });
-            createdTasks.Add(new { id = taskId, title = taskTitle });
+             
+        }
+        var grouped = order.Items.GroupBy(item => item.SectorId);   
+        foreach (var group in grouped)
+        {
+            var sector = await _context.Sectors.FirstOrDefaultAsync(s => s.Id == group.Key, cancellationToken);
+            if(sector is null) continue;
+           
+       var newTask = new WarehouseTask
+{
+    Id = Guid.NewGuid(),
+    Title = $"Unload delivery to {sector.Name}",
+    Status = TaskStatus.Todo,
+    CreatedById = request.CallerUserId,
+    InboundOrderId = order.Id,
+    SectorId = group.Key,
+    CreatedAt = DateTime.UtcNow
+};
+_context.WarehouseTasks.Add(newTask);
+createdTasks.Add(new { id = newTask.Id, title = newTask.Title });
+ foreach (var item in group)  // ← inside here
+    {
+        _context.TaskItems.Add(new TaskItem
+        {
+            Id= Guid.NewGuid(),
+            ProductName=item.ProductName,
+            Quantity=item.Quantity,
+            Barcode=item.Barcode,
+            IsCompleted=false,
+            WarehouseTaskId=newTask.Id
+        });
+    }
         }
         await _context.SaveChangesAsync(cancellationToken);
         var metadata = JsonSerializer.Serialize(new { tasks = createdTasks });
-        await _notificationservice.SendToRoleAsync("Supervisor", "Delivery arrived â€” assign workers to restock tasks", "DeliveryArrived", metadata);
+        await _notificationservice.SendToRoleAsync("Supervisor", "Delivery arrived ” assign workers to restock tasks", "DeliveryArrived", metadata);
         return true;
     }
 

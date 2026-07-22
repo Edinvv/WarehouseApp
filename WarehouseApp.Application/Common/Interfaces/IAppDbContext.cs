@@ -10,6 +10,7 @@ public interface IAppDbContext
     DbSet<WarehouseTask> WarehouseTasks { get; }
     DbSet<Comment> Comments { get; }
     DbSet<Message> Messages { get; }
+    DbSet<TaskItem> TaskItems { get; }
     DbSet<Notification> Notifications { get; }
     DbSet<InboundOrder> InboundOrders { get; }
     DbSet<InboundOrderItem> InboundOrderItems { get; }

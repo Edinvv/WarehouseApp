@@ -18,6 +18,7 @@ namespace WarehouseApp.Application.Features.Tasks.Queries;
             var tasks = await _context.WarehouseTasks
             .Where(t => t.SectorId == request.SectorId)
             .Include(t => t.TaskAssignments).ThenInclude(a => a.User)
+            .Include(t => t.Items)
             .Select(t => new TaskDto(
                 t.Id,
                 t.Title,
@@ -30,6 +31,13 @@ namespace WarehouseApp.Application.Features.Tasks.Queries;
                 t.TaskAssignments.Select(a => new TaskAssignmentDto(
                     a.UserId,
                     a.User.FirstName + " " + a.User.LastName
+                )).ToList(),
+                t.Items.Select(i => new TaskItemDto(
+                    i.Id,
+                    i.ProductName,
+                    i.Quantity,
+                    i.IsCompleted,
+                    i.Barcode
                 )).ToList()
             )).ToListAsync(cancellationToken);
             return tasks;

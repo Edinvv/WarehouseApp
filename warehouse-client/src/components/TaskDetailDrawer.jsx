@@ -11,16 +11,21 @@ export default function TaskDetailDrawer({ task, onClose, onStatusChange, onTask
   const [workers, setWorkers] = useState([])
   const [assigning, setAssigning] = useState(false)
   const [selectedWorkerIds, setSelectedWorkerIds] = useState([])
+  const [items, setItems] = useState([])
   const bottomRef = useRef(null)
 
   const isPrivileged = role === 'Admin' || role === 'Supervisor'
   const canChangeStatus = isPrivileged || (task?.assignments?.some(a => a.userId === userId) && task?.status !== 'Done')
-useEffect(()=>{
-  if (!task) return
-setSelectedWorkerIds(
-  task.assignments.map(a=>a.userId)
-)
-},[task])
+  useEffect(() => {
+    if (!task) return
+    setSelectedWorkerIds(task.assignments.map(a => a.userId))
+    setItems(task.items || [])
+  }, [task])
+
+  const handleCompleteItem = async (itemId) => {
+    await api.put(`/tasks/items/${itemId}/complete`)
+    setItems(prev => prev.map(i => i.id === itemId ? { ...i, isCompleted: true } : i))
+  }
   useEffect(() => {
     if (!task) return
     api.get(`/comments?taskId=${task.id}`).then(res => setComments(res.data))
@@ -102,6 +107,52 @@ setSelectedWorkerIds(
         <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
           {task.description && (
             <p style={{ fontSize: '14px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>{task.description}</p>
+          )}
+
+          {/* Checklist */}
+          {items.length > 0 && (
+            <div>
+              <p style={{ fontSize: '11px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px', fontFamily: 'Barlow, sans-serif', fontWeight: 600 }}>
+                Items — {items.filter(i => i.isCompleted).length}/{items.length} done
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                {items.map(item => (
+                  <div key={item.id} style={{
+                    display: 'flex', alignItems: 'center', gap: '10px',
+                    padding: '10px 14px',
+                    backgroundColor: item.isCompleted ? 'rgba(34,197,94,0.06)' : 'var(--bg)',
+                    border: `1px solid ${item.isCompleted ? 'rgba(34,197,94,0.3)' : 'var(--border)'}`,
+                    borderRadius: '7px',
+                  }}>
+                    <input
+                      type="checkbox"
+                      checked={item.isCompleted}
+                      disabled={item.isCompleted}
+                      onChange={() => handleCompleteItem(item.id)}
+                      style={{ accentColor: 'var(--status-done)', cursor: item.isCompleted ? 'default' : 'pointer', width: '15px', height: '15px' }}
+                    />
+                    <div style={{ flex: 1 }}>
+                      <span style={{
+                        fontSize: '13px',
+                        color: item.isCompleted ? 'var(--text-secondary)' : 'var(--text-primary)',
+                        textDecoration: item.isCompleted ? 'line-through' : 'none',
+                        fontFamily: 'Inter, sans-serif',
+                      }}>
+                        {item.productName}
+                      </span>
+                      {item.barcode && (
+                        <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontFamily: 'JetBrains Mono, monospace', marginLeft: '8px' }}>
+                          #{item.barcode}
+                        </span>
+                      )}
+                    </div>
+                    <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--accent)', fontFamily: 'JetBrains Mono, monospace' }}>
+                      ×{item.quantity}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
 
           <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>

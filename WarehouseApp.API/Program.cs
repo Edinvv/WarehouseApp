@@ -102,7 +102,7 @@ using (var scope = app.Services.CreateScope())
         await userManager.CreateAsync(admin, "Admin123!");
         await userManager.AddToRoleAsync(admin, "Admin");
     }
-    var sectorNames = new[] { "Electronics", "Clothing", "Food & Beverage", "Tools & Hardware" };
+    var sectorNames = new[] { "Dairy & Eggs", "Meat & Poultry", "Dry Goods & Grains", "Beverages", "Fruits & Vegetables", "Frozen Foods" };
 foreach (var name in sectorNames)
 {
     if (!db.Sectors.Any(s => s.Name == name))

@@ -21,6 +21,7 @@ public class WarehouseTask
     public string? CreatedById { get; set; }
     public AppUser CreatedBy { get; set; } = null!;
 public ICollection<TaskAssignment> TaskAssignments {get;set;} = new List<TaskAssignment>();
+public ICollection<TaskItem> Items { get; set; } = new List<TaskItem>();
 
     public ICollection<Comment> Comments { get; set; } = new List<Comment>();
 }
