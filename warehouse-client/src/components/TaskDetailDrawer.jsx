@@ -25,6 +25,7 @@ export default function TaskDetailDrawer({ task, onClose, onStatusChange, onTask
   const handleCompleteItem = async (itemId) => {
     await api.put(`/tasks/items/${itemId}/complete`)
     setItems(prev => prev.map(i => i.id === itemId ? { ...i, isCompleted: true } : i))
+    onTaskUpdated?.()
   }
   useEffect(() => {
     if (!task) return
@@ -112,9 +113,16 @@ export default function TaskDetailDrawer({ task, onClose, onStatusChange, onTask
           {/* Checklist */}
           {items.length > 0 && (
             <div>
-              <p style={{ fontSize: '11px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px', fontFamily: 'Barlow, sans-serif', fontWeight: 600 }}>
-                Items — {items.filter(i => i.isCompleted).length}/{items.length} done
-              </p>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                <p style={{ fontSize: '11px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', fontFamily: 'Barlow, sans-serif', fontWeight: 600 }}>
+                  Items — {items.filter(i => i.isCompleted).length}/{items.length} done
+                </p>
+                {task.status === 'Todo' && (
+                  <p style={{ fontSize: '11px', color: 'var(--text-secondary)', fontStyle: 'italic', fontFamily: 'Inter, sans-serif' }}>
+                    Start task to unlock
+                  </p>
+                )}
+              </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 {items.map(item => (
                   <div key={item.id} style={{
@@ -123,13 +131,14 @@ export default function TaskDetailDrawer({ task, onClose, onStatusChange, onTask
                     backgroundColor: item.isCompleted ? 'rgba(34,197,94,0.06)' : 'var(--bg)',
                     border: `1px solid ${item.isCompleted ? 'rgba(34,197,94,0.3)' : 'var(--border)'}`,
                     borderRadius: '7px',
+                    opacity: task.status === 'Todo' ? 0.5 : 1,
                   }}>
                     <input
                       type="checkbox"
                       checked={item.isCompleted}
-                      disabled={item.isCompleted}
+                      disabled={item.isCompleted || task.status === 'Todo'}
                       onChange={() => handleCompleteItem(item.id)}
-                      style={{ accentColor: 'var(--status-done)', cursor: item.isCompleted ? 'default' : 'pointer', width: '15px', height: '15px' }}
+                      style={{ accentColor: 'var(--status-done)', cursor: (item.isCompleted || task.status === 'Todo') ? 'not-allowed' : 'pointer', width: '15px', height: '15px' }}
                     />
                     <div style={{ flex: 1 }}>
                       <span style={{
@@ -147,7 +156,7 @@ export default function TaskDetailDrawer({ task, onClose, onStatusChange, onTask
                       )}
                     </div>
                     <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--accent)', fontFamily: 'JetBrains Mono, monospace' }}>
-                      ×{item.quantity}
+                      x{item.quantity}
                     </span>
                   </div>
                 ))}
@@ -220,7 +229,7 @@ export default function TaskDetailDrawer({ task, onClose, onStatusChange, onTask
                 Move to
               </p>
               <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                {COLUMNS.filter(c => c.key !== task.status).map(col => (
+                {COLUMNS.filter(c => c.key !== task.status && !(role === 'Worker' && c.key === 'Todo')).map(col => (
                   <button key={col.key} onClick={() => onStatusChange(task.id, col.key)} style={{
                     padding: '6px 12px', fontSize: '12px',
                     backgroundColor: 'transparent',

@@ -11,7 +11,10 @@ public record TaskDto(
     string Priority,
     DateTime? DueDate,
     DateTime CreatedAt,
+    DateTime? StartedAt,
+    DateTime? CompletedAt,
     Guid SectorId,
+    string? SectorName,
     List<TaskAssignmentDto> Assignments,
     List<TaskItemDto> Items
 );

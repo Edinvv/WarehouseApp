@@ -26,6 +26,23 @@ public class TasksController : ControllerBase
         return Ok(result);
     }
 
+    [HttpGet("by-order/{orderId}")]
+    [Authorize(Roles = "Admin,Supervisor")]
+    public async Task<IActionResult> GetTasksByOrder(Guid orderId)
+    {
+        var result = await _mediator.Send(new GetTasksByOrderQuery(orderId));
+        return Ok(result);
+    }
+
+    [HttpGet("my")]
+    [Authorize]
+    public async Task<IActionResult> GetMyTasks()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var result = await _mediator.Send(new GetMyTasksQuery(userId!));
+        return Ok(result);
+    }
+
     [HttpPost]
     [Authorize(Roles = "Admin,Supervisor")]
     public async Task<IActionResult> CreateTask(CreateTaskCommand command)

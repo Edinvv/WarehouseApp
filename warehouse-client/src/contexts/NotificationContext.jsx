@@ -1,7 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import * as signalR from '@microsoft/signalr'
 import { useAuth } from './AuthContext'
-
 const NotificationContext = createContext(null)
 
 function parseMeta(raw) {
@@ -60,7 +59,7 @@ export function NotificationProvider({ children }) {
   const unreadCount = notifications.filter(n => !n.read).length
 
   return (
-    <NotificationContext.Provider value={{ notifications, unreadCount, markAllRead, clearAll, markNotificationRead, markReadBySender, pendingDelivery, clearPendingDelivery }}>
+    <NotificationContext.Provider value={{ notifications, unreadCount, markAllRead, clearAll, markNotificationRead, markReadBySender, pendingDelivery, setPendingDelivery, clearPendingDelivery }}>
       {children}
     </NotificationContext.Provider>
   )

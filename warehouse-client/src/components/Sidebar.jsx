@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useNotifications } from '../contexts/NotificationContext'
@@ -14,6 +14,10 @@ const TYPE_ICONS = {
 function NotificationPanel({ onClose }) {
   const { notifications, unreadCount, markAllRead, clearAll, markNotificationRead } = useNotifications()
   const navigate = useNavigate()
+
+  useEffect(() => {
+    if (unreadCount > 0) markAllRead()
+  }, [])
 
   const handleClick = (n) => {
     if (n.type === 'TaskAssigned' && n.metadata?.sectorId) {
@@ -139,8 +143,10 @@ export default function Sidebar() {
   const [showNotifications, setShowNotifications] = useState(false)
 
   const navItems = [
-    { label: 'Sectors', path: '/dashboard', icon: '⬡' },
+    ...(role === 'Worker' ? [{ label: 'My Tasks', path: '/my-tasks', icon: '✓' }] : []),
+    ...(role !== 'Worker' ? [{ label: 'Sectors', path: '/dashboard', icon: '⬡' }] : []),
     ...(role === 'Admin' || role === 'Supervisor' ? [{ label: 'Inbound Orders', path: '/inbound-orders', icon: '↓' }] : []),
+    ...(role === 'Admin' || role === 'Supervisor' ? [{ label: 'Outbound Orders', path: '/outbound-orders', icon: '↑' }] : []),
     { label: 'Messages', path: '/messages', icon: '✉' },
     ...(role === 'Admin' ? [{ label: 'Team', path: '/users', icon: '◎' }] : []),
   ]

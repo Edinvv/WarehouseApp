@@ -2,21 +2,21 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using WarehouseApp.Application.Common.Interfaces;
 using WarehouseApp.Application.DTOs;
+using TaskStatus = WarehouseApp.Domain.Enums.TaskStatus;
 
 namespace WarehouseApp.Application.Features.Tasks.Queries;
 
-    public record GetTaskBySectorQuery(Guid SectorId) : IRequest<List<TaskDto>>;
-    public class GetTaskBySectorQueryHandler : IRequestHandler<GetTaskBySectorQuery, List<TaskDto>>
+public record GetMyTasksQuery(string UserId) : IRequest<List<TaskDto>>;
+
+public class GetMyTasksQueryHandler : IRequestHandler<GetMyTasksQuery, List<TaskDto>>
+{
+    private readonly IAppDbContext _context;
+    public GetMyTasksQueryHandler(IAppDbContext context) => _context = context;
+
+    public async Task<List<TaskDto>> Handle(GetMyTasksQuery request, CancellationToken cancellationToken)
     {
-        private readonly IAppDbContext _context;
-        public GetTaskBySectorQueryHandler(IAppDbContext context)
-        {
-            _context = context;
-        }
-        public async Task<List<TaskDto>> Handle(GetTaskBySectorQuery request, CancellationToken cancellationToken)
-        {
-            var tasks = await _context.WarehouseTasks
-            .Where(t => t.SectorId == request.SectorId)
+        return await _context.WarehouseTasks
+            .Where(t => t.TaskAssignments.Any(a => a.UserId == request.UserId))
             .Include(t => t.TaskAssignments).ThenInclude(a => a.User)
             .Include(t => t.Items)
             .Include(t => t.Sector)
@@ -44,6 +44,5 @@ namespace WarehouseApp.Application.Features.Tasks.Queries;
                     i.Barcode
                 )).ToList()
             )).ToListAsync(cancellationToken);
-            return tasks;
-        }
     }
+}

@@ -19,6 +19,8 @@ public class AppDbContext : IdentityDbContext<AppUser>, IAppDbContext
 public DbSet<InboundOrder> InboundOrders => Set<InboundOrder>();
 public DbSet<InboundOrderItem> InboundOrderItems => Set<InboundOrderItem>();
 public DbSet<TaskAssignment> TaskAssignments => Set<TaskAssignment>();
+public DbSet<OutboundOrder> OutboundOrders => Set<OutboundOrder>();
+public DbSet<OutboundOrderItem> OutboundOrderItems => Set<OutboundOrderItem>();
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);

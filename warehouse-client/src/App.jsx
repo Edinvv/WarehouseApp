@@ -8,6 +8,8 @@ import InboundOrdersPage from './pages/InboundOrdersPage'
 import MessagesPage from './pages/MessagesPage'
 import UsersPage from './pages/UsersPage'
 import DeliveryAssignModal from './components/DeliveryAssignModal'
+import MyTasksPage from './pages/MyTasksPage'
+import OutboundOrdersPage from './pages/OutboundOrdersPage'
 
 function ProtectedRoute({ children }) {
   const { isLoggedIn } = useAuth()
@@ -21,6 +23,13 @@ function AdminRoute({ children }) {
   return children
 }
 
+function NonWorkerRoute({ children }) {
+  const { isLoggedIn, role } = useAuth()
+  if (!isLoggedIn) return <Navigate to="/login" />
+  if (role === 'Worker') return <Navigate to="/my-tasks" />
+  return children
+}
+
 export default function App() {
   return (
     <div>
@@ -28,16 +37,22 @@ export default function App() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/dashboard" element={
-          <ProtectedRoute><DashboardPage /></ProtectedRoute>
+          <NonWorkerRoute><DashboardPage /></NonWorkerRoute>
         } />
         <Route path="/sectors/:id" element={
-          <ProtectedRoute><SectorBoardPage /></ProtectedRoute>
+          <NonWorkerRoute><SectorBoardPage /></NonWorkerRoute>
         } />
         <Route path="/sectors/:id/products" element={
           <ProtectedRoute><ProductsPage /></ProtectedRoute>
         } />
         <Route path="/inbound-orders" element={
           <ProtectedRoute><InboundOrdersPage /></ProtectedRoute>
+        } />
+        <Route path="/outbound-orders" element={
+          <NonWorkerRoute><OutboundOrdersPage /></NonWorkerRoute>
+        } />
+        <Route path="/my-tasks" element={
+          <ProtectedRoute><MyTasksPage /></ProtectedRoute>
         } />
         <Route path="/messages" element={
           <ProtectedRoute><MessagesPage /></ProtectedRoute>

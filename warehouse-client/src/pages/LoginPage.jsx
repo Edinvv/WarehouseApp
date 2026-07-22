@@ -18,7 +18,9 @@ export default function LoginPage() {
     try {
       const res = await api.post('/auth/login', { email, password })
       login(res.data.token)
-      navigate('/dashboard')
+      const payload = JSON.parse(atob(res.data.token.split('.')[1]))
+      const loginRole = payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role']
+      navigate(loginRole === 'Worker' ? '/my-tasks' : '/dashboard')
     } catch {
       setError('Invalid email or password.')
     } finally {

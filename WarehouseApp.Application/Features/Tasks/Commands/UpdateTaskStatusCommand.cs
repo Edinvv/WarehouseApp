@@ -32,7 +32,17 @@ public class UpdateTaskStatusCommandHandler : IRequestHandler<UpdateTaskStatusCo
         if (request.CallerRole == "Worker" && task.Status == TaskStatus.Done)
             return UpdateStatusResult.Forbidden;
 
+        if (request.CallerRole == "Worker" && request.NewStatus == TaskStatus.Todo)
+            return UpdateStatusResult.Forbidden;
+
         task.Status = request.NewStatus;
+
+        if (request.NewStatus == TaskStatus.InProgress && task.StartedAt == null)
+            task.StartedAt = DateTime.UtcNow;
+
+        if (request.NewStatus == TaskStatus.Done)
+            task.CompletedAt = DateTime.UtcNow;
+
         await _context.SaveChangesAsync(cancellationToken);
         return UpdateStatusResult.Success;
     }

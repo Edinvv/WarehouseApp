@@ -13,8 +13,11 @@ public class WarehouseTask
     public TaskPriority Priority { get; set; } = TaskPriority.Medium;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? DueDate { get; set; }
+    public DateTime? StartedAt { get; set; }
+    public DateTime? CompletedAt { get; set; }
     public Guid SectorId { get; set; }
     public Guid? InboundOrderId { get; set; }
+    public Guid? OutboundOrderId { get; set; }
 
     public Sector Sector { get; set; } = null!;
 
