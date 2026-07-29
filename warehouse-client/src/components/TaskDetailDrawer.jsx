@@ -12,7 +12,11 @@ export default function TaskDetailDrawer({ task, onClose, onStatusChange, onTask
   const [assigning, setAssigning] = useState(false)
   const [selectedWorkerIds, setSelectedWorkerIds] = useState([])
   const [items, setItems] = useState([])
+  const [scanMode, setScanMode] = useState(false)
+  const [scanValue, setScanValue] = useState('')
+  const [scanFeedback, setScanFeedback] = useState(null)
   const bottomRef = useRef(null)
+  const scanInputRef = useRef(null)
 
   const isPrivileged = role === 'Admin' || role === 'Supervisor'
   const canChangeStatus = isPrivileged || (task?.assignments?.some(a => a.userId === userId) && task?.status !== 'Done')
@@ -20,7 +24,31 @@ export default function TaskDetailDrawer({ task, onClose, onStatusChange, onTask
     if (!task) return
     setSelectedWorkerIds(task.assignments.map(a => a.userId))
     setItems(task.items || [])
+    setScanMode(false)
+    setScanFeedback(null)
   }, [task])
+
+  useEffect(() => {
+    if (scanMode) scanInputRef.current?.focus()
+  }, [scanMode])
+
+  const handleScan = async () => {
+    const barcode = scanValue.trim()
+    setScanValue('')
+    if (!barcode) return
+
+    const match = items.find(i => i.barcode === barcode && !i.isCompleted)
+    if (!match) {
+      const alreadyDone = items.find(i => i.barcode === barcode && i.isCompleted)
+      setScanFeedback({ ok: false, message: alreadyDone ? 'Already completed' : 'No match found' })
+      setTimeout(() => setScanFeedback(null), 2000)
+      return
+    }
+    await handleCompleteItem(match.id)
+    setScanFeedback({ ok: true, message: `✓ ${match.productName} checked off` })
+    setTimeout(() => setScanFeedback(null), 2000)
+    scanInputRef.current?.focus()
+  }
 
   const handleCompleteItem = async (itemId) => {
     await api.put(`/tasks/items/${itemId}/complete`)
@@ -122,7 +150,62 @@ export default function TaskDetailDrawer({ task, onClose, onStatusChange, onTask
                     Start task to unlock
                   </p>
                 )}
+                {task.status === 'InProgress' && (
+                  <button
+                    onClick={() => { setScanMode(v => !v); setScanFeedback(null) }}
+                    style={{
+                      padding: '4px 10px', fontSize: '11px', fontWeight: 600,
+                      backgroundColor: scanMode ? 'var(--accent)' : 'transparent',
+                      border: `1px solid ${scanMode ? 'var(--accent)' : 'var(--border)'}`,
+                      borderRadius: '5px',
+                      color: scanMode ? '#0F1117' : 'var(--text-secondary)',
+                      cursor: 'pointer', fontFamily: 'Barlow, sans-serif',
+                    }}
+                  >
+                    ⬛ {scanMode ? 'Stop Scanning' : 'Scan'}
+                  </button>
+                )}
               </div>
+              {scanMode && (
+                <div style={{ marginBottom: '10px' }}>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <input
+                      ref={scanInputRef}
+                      value={scanValue}
+                      onChange={e => setScanValue(e.target.value)}
+                      onKeyDown={e => e.key === 'Enter' && handleScan()}
+                      placeholder="Scan or type barcode, press Enter..."
+                      style={{
+                        flex: 1, padding: '8px 12px',
+                        backgroundColor: 'var(--bg)',
+                        border: '1px solid var(--accent)',
+                        borderRadius: '7px',
+                        color: 'var(--text-primary)',
+                        fontSize: '13px', fontFamily: 'JetBrains Mono, monospace',
+                        outline: 'none',
+                      }}
+                    />
+                    <button
+                      onClick={handleScan}
+                      style={{
+                        padding: '8px 14px', fontSize: '12px', fontWeight: 600,
+                        backgroundColor: 'var(--accent)', border: 'none',
+                        borderRadius: '7px', color: '#0F1117',
+                        cursor: 'pointer', fontFamily: 'Barlow, sans-serif',
+                      }}
+                    >OK</button>
+                  </div>
+                  {scanFeedback && (
+                    <p style={{
+                      marginTop: '6px', fontSize: '12px',
+                      color: scanFeedback.ok ? '#22C55E' : 'var(--danger)',
+                      fontFamily: 'Inter, sans-serif', fontWeight: 600,
+                    }}>
+                      {scanFeedback.message}
+                    </p>
+                  )}
+                </div>
+              )}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 {items.map(item => (
                   <div key={item.id} style={{
@@ -133,13 +216,15 @@ export default function TaskDetailDrawer({ task, onClose, onStatusChange, onTask
                     borderRadius: '7px',
                     opacity: task.status === 'Todo' ? 0.5 : 1,
                   }}>
-                    <input
-                      type="checkbox"
-                      checked={item.isCompleted}
-                      disabled={item.isCompleted || task.status === 'Todo'}
-                      onChange={() => handleCompleteItem(item.id)}
-                      style={{ accentColor: 'var(--status-done)', cursor: (item.isCompleted || task.status === 'Todo') ? 'not-allowed' : 'pointer', width: '15px', height: '15px' }}
-                    />
+                    {!scanMode && (
+                      <input
+                        type="checkbox"
+                        checked={item.isCompleted}
+                        disabled={item.isCompleted || task.status === 'Todo'}
+                        onChange={() => handleCompleteItem(item.id)}
+                        style={{ accentColor: 'var(--status-done)', cursor: (item.isCompleted || task.status === 'Todo') ? 'not-allowed' : 'pointer', width: '15px', height: '15px' }}
+                      />
+                    )}
                     <div style={{ flex: 1 }}>
                       <span style={{
                         fontSize: '13px',

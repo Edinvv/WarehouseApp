@@ -40,7 +40,7 @@ public class OutboundOrdersController : ControllerBase
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var result = await _mediator.Send(new ReviewOutboundOrderCommand(id, request.IsApproved, userId));
-        if (!result) return NotFound();
+        if (!result.Success) return result.Error == "Order not found." ? NotFound() : BadRequest(result.Error);
         return Ok();
     }
 

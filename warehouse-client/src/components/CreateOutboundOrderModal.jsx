@@ -25,47 +25,67 @@ const labelStyle = {
   fontFamily: 'Barlow, sans-serif',
 }
 
-const emptyItem = () => ({ productName: '', barcode: '', quantity: '', sectorId: '' })
-
 export default function CreateOutboundOrderModal({ open, onClose, onCreated }) {
   const [restaurantName, setRestaurantName] = useState('')
-  const [items, setItems] = useState([emptyItem()])
-  const [sectors, setSectors] = useState([])
+  const [stock, setStock] = useState([])
+  const [selected, setSelected] = useState({})
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
-    if (open) api.get('/sectors').then(res => setSectors(res.data))
+    if (!open) return
+    setRestaurantName('')
+    setSelected({})
+    api.get('/stock').then(res => setStock(res.data))
   }, [open])
 
   if (!open) return null
 
-  const addItem = () => setItems(prev => [...prev, emptyItem()])
-  const removeItem = (index) => setItems(prev => prev.filter((_, i) => i !== index))
-  const updateItem = (index, field, value) =>
-    setItems(prev => prev.map((item, i) => i === index ? { ...item, [field]: value } : item))
+  const toggle = (item) => {
+    setSelected(prev => {
+      if (prev[item.id]) {
+        const next = { ...prev }
+        delete next[item.id]
+        return next
+      }
+      return { ...prev, [item.id]: { ...item, requestedQty: 1 } }
+    })
+  }
+
+  const setQty = (id, qty, max) => {
+    const clamped = Math.min(Math.max(1, parseInt(qty) || 1), max)
+    setSelected(prev => ({ ...prev, [id]: { ...prev[id], requestedQty: clamped } }))
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!restaurantName.trim() || items.some(i => !i.productName.trim() || !i.sectorId)) return
+    const items = Object.values(selected)
+    if (!restaurantName.trim() || items.length === 0) return
     setSaving(true)
     try {
       await api.post('/outboundorders', {
         restaurantName: restaurantName.trim(),
         items: items.map(i => ({
-          productName: i.productName.trim(),
-          barcode: i.barcode.trim(),
-          quantity: parseInt(i.quantity) || 1,
+          productName: i.productName,
+          barcode: i.barcode,
+          quantity: i.requestedQty,
           sectorId: i.sectorId,
         })),
       })
-      setRestaurantName('')
-      setItems([emptyItem()])
       onCreated()
       onClose()
     } finally {
       setSaving(false)
     }
   }
+
+  const selectedCount = Object.keys(selected).length
+
+  const grouped = stock.reduce((acc, item) => {
+    const key = item.sectorName
+    if (!acc[key]) acc[key] = []
+    acc[key].push(item)
+    return acc
+  }, {})
 
   return (
     <div style={{
@@ -78,114 +98,128 @@ export default function CreateOutboundOrderModal({ open, onClose, onCreated }) {
         backgroundColor: 'var(--surface)',
         border: '1px solid var(--border)',
         borderRadius: '14px',
-        padding: '28px',
-        width: '620px',
-        maxWidth: '100%',
-        maxHeight: '90vh',
-        overflowY: 'auto',
+        width: '640px', maxWidth: '100%', maxHeight: '90vh',
+        display: 'flex', flexDirection: 'column',
+        overflow: 'hidden',
       }} onClick={e => e.stopPropagation()}>
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-          <div>
-            <p style={{ fontSize: '11px', color: '#22C55E', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: '4px' }}>
-              Outbound Order
-            </p>
-            <h2 style={{ fontFamily: 'Barlow, sans-serif', fontSize: '20px', fontWeight: 700, color: 'var(--text-primary)' }}>
-              New Restaurant Order
-            </h2>
+        {/* Header */}
+        <div style={{ padding: '24px 28px', borderBottom: '1px solid var(--border)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div>
+              <p style={{ fontSize: '11px', color: '#22C55E', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: '4px' }}>
+                Outbound Order
+              </p>
+              <h2 style={{ fontFamily: 'Barlow, sans-serif', fontSize: '20px', fontWeight: 700, color: 'var(--text-primary)' }}>
+                New Restaurant Order
+              </h2>
+            </div>
+            <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', fontSize: '20px', cursor: 'pointer' }}>×</button>
           </div>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', fontSize: '20px', cursor: 'pointer' }}>×</button>
-        </div>
-
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <div>
+          <div style={{ marginTop: '16px' }}>
             <label style={labelStyle}>Restaurant Name *</label>
             <input value={restaurantName} onChange={e => setRestaurantName(e.target.value)}
-              placeholder="e.g. The Grand Bistro" style={inputStyle} required />
+              placeholder="e.g. The Grand Bistro" style={inputStyle} />
           </div>
+        </div>
 
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-              <p style={{ ...labelStyle, marginBottom: 0 }}>Items to Pick *</p>
-              <button type="button" onClick={addItem} style={{
-                padding: '5px 12px', fontSize: '12px',
-                backgroundColor: 'transparent',
-                border: '1px solid var(--accent)',
-                borderRadius: '6px', color: 'var(--accent)',
-                cursor: 'pointer', fontFamily: 'Barlow, sans-serif', fontWeight: 600,
-              }}>+ Add Item</button>
-            </div>
+        {/* Stock list */}
+        <div style={{ flex: 1, overflowY: 'auto', padding: '16px 28px' }}>
+          <p style={{ ...labelStyle, marginBottom: '12px' }}>
+            Select Products ({selectedCount} selected)
+          </p>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {items.map((item, index) => (
-                <div key={index} style={{
-                  padding: '14px',
-                  backgroundColor: 'var(--bg)',
-                  border: '1px solid var(--border)',
-                  borderRadius: '8px',
-                }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                    <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)', fontFamily: 'Barlow, sans-serif' }}>
-                      Item {index + 1}
-                    </span>
-                    {items.length > 1 && (
-                      <button type="button" onClick={() => removeItem(index)} style={{
-                        background: 'none', border: 'none',
-                        color: 'var(--danger)', fontSize: '18px',
-                        cursor: 'pointer', lineHeight: 1,
-                      }}>×</button>
-                    )}
-                  </div>
-
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                    <div>
-                      <label style={labelStyle}>Product Name *</label>
-                      <input value={item.productName} onChange={e => updateItem(index, 'productName', e.target.value)}
-                        placeholder="e.g. Olive Oil" style={inputStyle} required />
-                    </div>
-                    <div>
-                      <label style={labelStyle}>Barcode</label>
-                      <input value={item.barcode} onChange={e => updateItem(index, 'barcode', e.target.value)}
-                        placeholder="e.g. 5901234123457" style={inputStyle} />
-                    </div>
-                    <div>
-                      <label style={labelStyle}>Quantity *</label>
-                      <input type="number" min="1" value={item.quantity} onChange={e => updateItem(index, 'quantity', e.target.value)}
-                        placeholder="0" style={inputStyle} required />
-                    </div>
-                    <div>
-                      <label style={labelStyle}>Pick From Sector *</label>
-                      <select value={item.sectorId} onChange={e => updateItem(index, 'sectorId', e.target.value)} style={inputStyle} required>
-                        <option value="">Select sector...</option>
-                        {sectors.map(s => (
-                          <option key={s.id} value={s.id}>{s.name}</option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
+          {stock.length === 0 ? (
+            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', textAlign: 'center', padding: '32px 0' }}>
+              No stock available. Complete an inbound order first.
+            </p>
+          ) : (
+            Object.entries(grouped).map(([sectorName, items]) => (
+              <div key={sectorName} style={{ marginBottom: '20px' }}>
+                <p style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px', fontFamily: 'Barlow, sans-serif' }}>
+                  ⬡ {sectorName}
+                </p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  {items.map(item => {
+                    const isSelected = !!selected[item.id]
+                    return (
+                      <div key={item.id} style={{
+                        display: 'flex', alignItems: 'center', gap: '12px',
+                        padding: '10px 14px',
+                        backgroundColor: isSelected ? 'rgba(34,197,94,0.06)' : 'var(--bg)',
+                        border: `1px solid ${isSelected ? 'rgba(34,197,94,0.4)' : 'var(--border)'}`,
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        transition: 'all 0.15s',
+                      }} onClick={() => toggle(item)}>
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => toggle(item)}
+                          style={{ accentColor: '#22C55E', cursor: 'pointer', width: '15px', height: '15px' }}
+                          onClick={e => e.stopPropagation()}
+                        />
+                        <div style={{ flex: 1 }}>
+                          <p style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)', fontFamily: 'Inter, sans-serif' }}>
+                            {item.productName}
+                          </p>
+                          {item.barcode && (
+                            <p style={{ fontSize: '11px', color: 'var(--text-secondary)', fontFamily: 'JetBrains Mono, monospace' }}>
+                              #{item.barcode}
+                            </p>
+                          )}
+                        </div>
+                        <span style={{ fontSize: '12px', color: 'var(--text-secondary)', fontFamily: 'JetBrains Mono, monospace', whiteSpace: 'nowrap' }}>
+                          {item.quantity} available
+                        </span>
+                        {isSelected && (
+                          <input
+                            type="number"
+                            min="1"
+                            max={item.quantity}
+                            value={selected[item.id].requestedQty}
+                            onChange={e => setQty(item.id, e.target.value, item.quantity)}
+                            onClick={e => e.stopPropagation()}
+                            style={{ ...inputStyle, width: '70px', textAlign: 'center', fontFamily: 'JetBrains Mono, monospace' }}
+                          />
+                        )}
+                      </div>
+                    )
+                  })}
                 </div>
-              ))}
-            </div>
-          </div>
+              </div>
+            ))
+          )}
+        </div>
 
-          <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
-            <button type="button" onClick={onClose} style={{
+        {/* Footer */}
+        <div style={{ padding: '16px 28px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span style={{ fontSize: '12px', color: 'var(--text-secondary)', fontFamily: 'Inter, sans-serif' }}>
+            {selectedCount === 0 ? 'No products selected' : `${selectedCount} product${selectedCount > 1 ? 's' : ''} selected`}
+          </span>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button onClick={onClose} style={{
               padding: '9px 18px', backgroundColor: 'transparent',
               border: '1px solid var(--border)', borderRadius: '7px',
               color: 'var(--text-secondary)', fontSize: '14px', cursor: 'pointer',
               fontFamily: 'Inter, sans-serif',
             }}>Cancel</button>
-            <button type="submit" disabled={saving} style={{
-              padding: '9px 22px', backgroundColor: '#22C55E',
-              border: 'none', borderRadius: '7px',
-              color: '#0F1117', fontSize: '14px', fontWeight: 600,
-              cursor: saving ? 'not-allowed' : 'pointer',
-              fontFamily: 'Barlow, sans-serif',
-            }}>
-              {saving ? 'Submitting...' : 'Place Order'}
+            <button
+              onClick={handleSubmit}
+              disabled={saving || !restaurantName.trim() || selectedCount === 0}
+              style={{
+                padding: '9px 22px',
+                backgroundColor: saving || !restaurantName.trim() || selectedCount === 0 ? 'var(--border)' : '#22C55E',
+                border: 'none', borderRadius: '7px',
+                color: saving || !restaurantName.trim() || selectedCount === 0 ? 'var(--text-secondary)' : '#0F1117',
+                fontSize: '14px', fontWeight: 600,
+                cursor: saving || !restaurantName.trim() || selectedCount === 0 ? 'not-allowed' : 'pointer',
+                fontFamily: 'Barlow, sans-serif',
+              }}>
+              {saving ? 'Placing...' : 'Place Order'}
             </button>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   )

@@ -27,6 +27,19 @@ public class DispatchOutboundOrderCommandHandler : IRequestHandler<DispatchOutbo
         if (!allDone) return false;
 
         order.Status = OutboundOrderStatus.Dispatched;
+        var items = await _context.OutboundOrderItems
+    .Where(i => i.OutboundOrderId == request.OrderId)
+    .ToListAsync(cancellationToken);
+
+foreach (var item in items)
+{
+    var stock = await _context.Stock.FirstOrDefaultAsync(
+        s => s.SectorId == item.SectorId && s.ProductName == item.ProductName,
+        cancellationToken);
+
+    if (stock != null)
+        stock.Quantity = Math.Max(0, stock.Quantity - item.Quantity);
+}
         await _context.SaveChangesAsync(cancellationToken);
         return true;
     }

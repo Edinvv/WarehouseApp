@@ -10,14 +10,13 @@ public record InboundOrderItemDto(
     int MinimumQuantity,
     Guid SectorId
 );
-    public record InboundOrderDto
-    (
-        Guid Id,
-        string SupplierName,
-        string Status,
-        string CreatedById,
-        string? ReviewedById,
-        DateTime CreatedAt,
-        List<InboundOrderItemDto> Items
 
-    );
+public record InboundOrderDto(
+    Guid Id,
+    string SupplierName,
+    string Status,
+    string CreatedById,
+    string? ReviewedById,
+    DateTime CreatedAt,
+    List<InboundOrderItemDto> Items
+);

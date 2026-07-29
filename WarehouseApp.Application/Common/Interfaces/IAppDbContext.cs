@@ -17,6 +17,7 @@ public interface IAppDbContext
     DbSet<TaskAssignment> TaskAssignments {get;}
     DbSet<OutboundOrder> OutboundOrders { get; }
     DbSet<OutboundOrderItem> OutboundOrderItems { get; }
+    DbSet<Stock> Stock { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

@@ -34,6 +34,8 @@ function OrderCard({ order, isAdmin, isPrivileged, onAction, onAssignWorkers }) 
     try {
       await api.post(`/outboundorders/${order.id}/review`, { isApproved: approved })
       onAction()
+    } catch (err) {
+      if (err.response?.status === 400) alert(err.response.data)
     } finally { setActing(false) }
   }
 

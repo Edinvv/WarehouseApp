@@ -8,9 +8,10 @@ using TaskStatus = WarehouseApp.Domain.Enums.TaskStatus;
 
 namespace WarehouseApp.Application.Features.OutboundOrders.Commands;
 
-public record ReviewOutboundOrderCommand(Guid OrderId, bool IsApproved, string? CallerUserId) : IRequest<bool>;
+public record ReviewOutboundResult(bool Success, string? Error = null);
+public record ReviewOutboundOrderCommand(Guid OrderId, bool IsApproved, string? CallerUserId) : IRequest<ReviewOutboundResult>;
 
-public class ReviewOutboundOrderCommandHandler : IRequestHandler<ReviewOutboundOrderCommand, bool>
+public class ReviewOutboundOrderCommandHandler : IRequestHandler<ReviewOutboundOrderCommand, ReviewOutboundResult>
 {
     private readonly IAppDbContext _context;
     private readonly INotificationService _notification;
@@ -20,20 +21,32 @@ public class ReviewOutboundOrderCommandHandler : IRequestHandler<ReviewOutboundO
         _notification = notification;
     }
 
-    public async Task<bool> Handle(ReviewOutboundOrderCommand request, CancellationToken cancellationToken)
+    public async Task<ReviewOutboundResult> Handle(ReviewOutboundOrderCommand request, CancellationToken cancellationToken)
     {
         var order = await _context.OutboundOrders
             .Include(o => o.Items)
             .FirstOrDefaultAsync(o => o.Id == request.OrderId, cancellationToken);
 
-        if (order is null) return false;
+        if (order is null) return new ReviewOutboundResult(false, "Order not found.");
 
         if (!request.IsApproved)
         {
             order.Status = OutboundOrderStatus.Rejected;
             await _context.SaveChangesAsync(cancellationToken);
             await _notification.SendToRoleAsync("Supervisor", $"Outbound order for {order.RestaurantName} was rejected.", "OrderReviewed");
-            return true;
+            return new ReviewOutboundResult(true);
+        }
+
+        foreach (var item in order.Items)
+        {
+            var stock = await _context.Stock.FirstOrDefaultAsync(
+                s => s.SectorId == item.SectorId && s.ProductName == item.ProductName, cancellationToken);
+
+            if (stock is null)
+                return new ReviewOutboundResult(false, $"\"{item.ProductName}\" is not in stock for that sector.");
+
+            if (stock.Quantity < item.Quantity)
+                return new ReviewOutboundResult(false, $"Insufficient stock for \"{item.ProductName}\": requested {item.Quantity}, available {stock.Quantity}.");
         }
 
         order.Status = OutboundOrderStatus.Approved;
@@ -82,6 +95,6 @@ public class ReviewOutboundOrderCommandHandler : IRequestHandler<ReviewOutboundO
             "DeliveryArrived",
             tasksJson);
 
-        return true;
+        return new ReviewOutboundResult(true);
     }
 }

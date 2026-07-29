@@ -6,7 +6,7 @@ using Scalar.AspNetCore;
 using WarehouseApp.Domain.Entities;
 using WarehouseApp.Infrastructure;
 using WarehouseApp.Infrastructure.Hubs;
-
+using WarehouseApp.Infrastructure.Persistence;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddInfrastructure(builder.Configuration);
@@ -112,6 +112,10 @@ foreach (var name in sectorNames)
 }
 await db.SaveChangesAsync();
 }
-
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await DataSeeder.SeedAsync(db);
+}
 app.Run();
 
