@@ -1,3 +1,5 @@
+<img width="469" height="711" alt="arhitectureflow drawio" src="https://github.com/user-attachments/assets/9c871445-c3a8-42c3-9cb3-1da19518cf92" />
+<img width="2304" height="1162" alt="completeflow drawio (1)" src="https://github.com/user-attachments/assets/53b0741d-fea4-45bf-a88d-50f682bf51a8" />
 # WarehouseApp
 
 A full-stack warehouse management system built for restaurant supply operations. Supports the full inbound and outbound order lifecycle with real-time notifications, role-based access control, and barcode scanning for warehouse workers.
