@@ -12,8 +12,8 @@ namespace WarehouseApp.Infrastructure;
         this IServiceCollection services, IConfiguration configuration)
     {
         // register things here
-        services.AddDbContext<AppDbContext>(options => 
-        options.UseSqlite(configuration.GetConnectionString("DefaultConnection")));
+        services.AddDbContext<AppDbContext>(options =>
+        options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
         services.AddScoped<IAppDbContext>(provider => provider.GetRequiredService<AppDbContext>());
 
         services.AddSignalR();
