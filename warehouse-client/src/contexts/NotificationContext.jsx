@@ -17,7 +17,7 @@ export function NotificationProvider({ children }) {
     if (!isLoggedIn || !token) return
 
     const conn = new signalR.HubConnectionBuilder()
-      .withUrl('http://localhost:5200/hubs/notifications', {
+      .withUrl(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5200'}/hubs/notifications`, {
         accessTokenFactory: () => token,
       })
       .withAutomaticReconnect()
