@@ -2,6 +2,11 @@
 <img width="2304" height="1162" alt="completeflow drawio (1)" src="https://github.com/user-attachments/assets/53b0741d-fea4-45bf-a88d-50f682bf51a8" />
 # WarehouseApp
 
+## 🚀 Live Demo
+**[https://warehouse-o5zvcldzm-edco1.vercel.app](https://warehouse-o5zvcldzm-edco1.vercel.app)**
+
+> Login: `admin@warehouse.com` / `Admin123!`
+
 A full-stack warehouse management system built for restaurant supply operations. Supports the full inbound and outbound order lifecycle with real-time notifications, role-based access control, and barcode scanning for warehouse workers.
 
 ---
@@ -12,7 +17,7 @@ A full-stack warehouse management system built for restaurant supply operations.
 - ASP.NET Core Web API (.NET 10)
 - Clean Architecture (Domain / Application / Infrastructure / API)
 - CQRS with MediatR
-- Entity Framework Core + SQLite
+- Entity Framework Core + PostgreSQL (Neon)
 - ASP.NET Identity + JWT Authentication
 - SignalR (real-time notifications)
 
