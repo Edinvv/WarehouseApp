@@ -55,10 +55,9 @@ builder.Services.AddOpenApi();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReact", policy =>
-        policy.WithOrigins(
-                "http://localhost:5173",
-                "https://warehouse-2a6cjawu7-edco1.vercel.app"
-              )
+        policy.SetIsOriginAllowed(origin =>
+                origin.StartsWith("http://localhost") ||
+                origin.EndsWith(".vercel.app"))
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials());
