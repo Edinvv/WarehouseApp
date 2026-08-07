@@ -129,4 +129,4 @@ The frontend runs on `http://localhost:5173`.
 
 ## Project Status
 
-Currently running locally. Deployment coming soon.
+DEPLOYED
