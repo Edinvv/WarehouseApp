@@ -7,6 +7,8 @@
 
 > Login: `admin@warehouse.com` / `Admin123!`
 
+![CI](https://github.com/Edinvv/WarehouseApp/actions/workflows/ci.yml/badge.svg)
+
 A full-stack warehouse management system built for restaurant supply operations. Supports the full inbound and outbound order lifecycle with real-time notifications, role-based access control, and barcode scanning for warehouse workers.
 
 ---
@@ -70,25 +72,6 @@ A full-stack warehouse management system built for restaurant supply operations.
 
 ---
 
-## Running Locally
-
-### Prerequisites
-- .NET 10 SDK
-- Node.js 18+
-
-### Backend
-```bash
-dotnet run --project WarehouseApp.API
-```
-The API runs on `https://localhost:7xxx` (check console output for exact port).
-
-### Frontend
-```bash
-cd warehouse-client
-npm install
-npm run dev
-```
-The frontend runs on `http://localhost:5173`.
 
 ### Default Credentials
 
@@ -121,12 +104,45 @@ The frontend runs on `http://localhost:5173`.
 ┌──────────▼──────┐  ┌───────▼────────────┐
 │  Domain Layer   │  │  Infrastructure    │
 │  Entities &     │  │  EF Core, Identity │
-│  Enums          │  │  SignalR, SQLite   │
+│  Enums          │  │  SignalR, Postgres │
 └─────────────────┘  └────────────────────┘
 ```
 
 ---
 
-## Project Status
+## Deployment
 
-DEPLOYED
+| Service | Platform | URL |
+|---------|----------|-----|
+| Frontend | Vercel | https://warehouse-o5zvcldzm-edco1.vercel.app |
+| Backend API | Render (Docker) | https://warehouseapp-qlso.onrender.com |
+| Database | Neon PostgreSQL | Cloud hosted |
+
+CI/CD via GitHub Actions — runs unit tests on every push, blocks deploy if tests fail.
+
+## Running Locally
+
+### Prerequisites
+- .NET 10 SDK
+- Node.js 18+
+
+### Backend
+Create `WarehouseApp.API/appsettings.Development.json`:
+```json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Host=...;Database=...;Username=...;Password=...;SSL Mode=Require;Trust Server Certificate=true"
+  }
+}
+```
+Then run:
+```bash
+dotnet run --project WarehouseApp.API
+```
+
+### Frontend
+```bash
+cd warehouse-client
+npm install
+npm run dev
+```
